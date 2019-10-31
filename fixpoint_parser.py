@@ -46,11 +46,12 @@ def get_variable(input_line, var_dict):
 
     return var_dict
 ##
-def check_format(input_line):
+def check_format(input_line, var_dict):
     FMUL_re = re.compile('FMUL3\(\s*\w+\s*,\s*\w+\s*,\s*\w+\s*\)')
     op1_re = re.compile('\(\s*\w+\s*,')
     op2_re = re.compile(',\s*\w+\s*,')
     op3_re = re.compile(',\s*\w+\s*\)')
+    
     if FMUL_re.search(input_line):
         fmul_list = FMUL_re.findall(input_line)
         for match in fmul_list:
@@ -58,16 +59,39 @@ def check_format(input_line):
             print(a)
             for i,val in enumerate(a):
                 a[i] = a[i].strip()
-            a = ''.join(a)
-            #operands = scanf.scanf('(%s,\s*%s,\s*%d)',a)
+            print(a)
+            a = ','.join(a)
+            #print(a)
+            #operands = scanf.scanf('(%s,%s,%s)',a)
             #operands = match.split('3')[1]
             #print(operands)
-            op1 = ''.join(scanf.scanf('(%s',a[0]))
-            op2 = ''.join(a[1])
-            op3 = ''.join(scanf.scanf('%s)',a[2]))
-            
-            print(a)
+            #print(a[0], type(a[0]))
+            #op1 = a''.join(scanf.scanf('(%s',a[0]))
+            #print(a[1], type(a[1]))
+            #print(a[2], type(a[2]))
+            op2 = a[1]#''.join(a[1])
+            #op3 = ''.join(scanf.scanf('%s)',a[2]))
 
+            try:
+                op3 = int(op3)
+            except ValueError:
+                sys.exit('Value Error: operand 3 not a numeric literal\nInput line: {}'.format(input_line))
+
+    dest_re = re.compile('\s*\w\s*=')
+
+    if FMUL_re.search(input_line) and dest_re.match(input_line):
+        dest_str = dest_re.match(input_line).group()[:-1].strip()
+        if (dest_str and op1 and op2) in var_dict.keys():
+            frac_bits = var_dict[op1].fraction + var_dict[op2].fraction - op3
+            if var_dict[dest_str].fraction is not frac_bits:
+                print("Error: result expected Q{0} from Q{1} * Q{2}".format(var_dict[dest_str].qformat(),
+                                                                            var_dict[op1].qformat(),
+                                                                            var_dict[op2].qformat()
+                                                                            )
+                      )
+        else:
+            pass # TODO figure out how to handle misses
+            
 ##
 
 
@@ -110,7 +134,7 @@ with path.open() as in_file:
         elif line.strip().startswith(r'fix_t'): # identify variables & assign format
             var_dict = get_variable(line.strip(), var_dict)
         elif 'FMUL3(' in line.strip():
-            check_format(line.strip())
+            check_format(line.strip(), var_dict)
             found_fmul3 = True;#print(line + " found FMUL",end='')
 
         print(line.rstrip('\n'), end=' ')
