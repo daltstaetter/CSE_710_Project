@@ -45,11 +45,28 @@ def get_variable(input_line, var_dict):
             var_dict[i.strip()] = fix(nInt,nFraction)
 
     return var_dict
-#
+##
 def check_format(input_line):
-    FMUL_re = re.compile('FMUL3\(\w,\w,\w\)')
-    
-    pass
+    FMUL_re = re.compile('FMUL3\(\s*\w+\s*,\s*\w+\s*,\s*\w+\s*\)')
+    op1_re = re.compile('\(\s*\w+\s*,')
+    op2_re = re.compile(',\s*\w+\s*,')
+    op3_re = re.compile(',\s*\w+\s*\)')
+    if FMUL_re.search(input_line):
+        fmul_list = FMUL_re.findall(input_line)
+        for match in fmul_list:
+            a=match.split('3')[1].split(',')
+            print(a)
+            for i,val in enumerate(a):
+                a[i] = a[i].strip()
+            a = ''.join(a)
+            #operands = scanf.scanf('(%s,\s*%s,\s*%d)',a)
+            #operands = match.split('3')[1]
+            #print(operands)
+            op1 = ''.join(scanf.scanf('(%s',a[0]))
+            op2 = ''.join(a[1])
+            op3 = ''.join(scanf.scanf('%s)',a[2]))
+            
+            print(a)
 
 ##
 
