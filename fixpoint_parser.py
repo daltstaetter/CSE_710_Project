@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 from platform import python_version
+#from importlib import reload
+import os,sys, pathlib, re, scanf, fix
+#reload(fix)
+from fix import fix
+
 ver = python_version()
 
 if ver.startswith('2'):
     sys.exit('Run with python3')
 
-from importlib import reload
-import os,sys, pathlib, re, scanf, fix
-reload(fix)
-from fix import fix
+
 
 WORD_SIZE=32
 FIX_BITS=WORD_SIZE-1
@@ -48,11 +50,12 @@ def get_variable(input_line, var_dict):
 
     return var_dict
 ##
-def check_format(input_line, var_dict):
+def check_format(input_line, var_dict, line_num):
     FMUL_re = re.compile('FMUL3\(\s*\w+\s*,\s*\w+\s*,\s*[-]*\w+\s*\)')
     op1_re = re.compile('\(\s*\w+\s*,')
     op2_re = re.compile(',\s*\w+\s*,')
     op3_re = re.compile(',\s*\w+\s*\)')
+
     #try:
     if FMUL_re.search(input_line):
         fmul_list = FMUL_re.findall(input_line)
@@ -68,18 +71,19 @@ def check_format(input_line, var_dict):
             except ValueError:
                 sys.exit('Value Error: operand 3 not a numeric literal\nInput line: {}'.format(input_line))
 
-    dest_re = re.compile('\s*\w\s*=')
-
+    dest_re = re.compile('\s*\w+\s*=')
+    
     if FMUL_re.search(input_line) and dest_re.match(input_line):
         dest_str = dest_re.match(input_line).group()[:-1].strip()
         if (dest_str and op1 and op2) in var_dict.keys():
             frac_bits = var_dict[op1].fraction() + var_dict[op2].fraction() - op3
             if var_dict[dest_str].fraction() is not frac_bits:
-                print("Error: expected->Q{0}, calculated->Q{1} from Q{2} * Q{3}".format(
+                print("Error:{4}: expected->Q{0}, calculated->Q{1}\tfrom Q{2} * Q{3}".format(
                                                                             var_dict[dest_str].qformat(),
                                                                             (FIX_BITS-frac_bits, frac_bits),
                                                                             var_dict[op1].qformat(),
-                                                                            var_dict[op2].qformat()
+                                                                            var_dict[op2].qformat(),
+                                                                            line_num
                                                                             )
                       )
         else:
@@ -129,15 +133,8 @@ with path.open() as in_file:
         elif line.strip().startswith(r'fix_t'): # identify variables & assign format
             var_dict = get_variable(line.strip(), var_dict)
         elif 'FMUL3(' in line.strip():
-            check_format(line.strip(), var_dict)
-            found_fmul3 = True;#print(line + " found FMUL",end='')
+            check_format(line.strip(), var_dict, line_num)
 
-        print(line.rstrip('\n'), end=' ')
-        if found_fmul3 is True:
-            print("Found FMUL3", end='')
-            found_fmul3 = False
-
-        print("")
 ##        
 for key,val in var_dict.items():
     print("{0}: Q{1}.{2}".format(key,val.integer(),val.fraction()))
