@@ -6,35 +6,25 @@ ver = python_version()
 if ver.startswith('2'):
     sys.exit('Run with python3')
 
-import os,sys, pathlib, re, scanf
+from importlib import reload
+import os,sys, pathlib, re, scanf, fix
+reload(fix)
+from fix import fix
 
 
+##
 
 
+##
 def get_variable(input_line):
-    var_dict = {}
-    var_re = re.compile("fix_t \w[,\s\w]*") # gets all var declarations
-    #Qformat = re.compile("fix_t\s+\w[,\s\w]*[\s=]*[x\d\sa-fA-F]*;\s*/[\*/]+\s*[Qq][\d]+\.[\d]+[\s\*]*[/]*") # fix_t a[,b,c,d][ = 0x123]; // Q3.28 
-    match = var_re.match(input_line)
-    if match:
-        match_str = match.group()
-        in_vars = match_str.split('fix_t')[1].strip() # removes 'fix_t'
-
-        for i in in_vars.split(','):
-            var_dict[i.strip()] = None
-
-    print(var_dict)
-
-    # get q_format
+    # Get q_format
     if '//' in input_line:
         var_qformat_str = input_line.split('//')[1].strip()
-        print(var_qformat_str)
         while var_qformat_str[0] is not ('q' or 'Q') and ('q' or 'Q') in var_qformat_str[1:]:
             var_qformat_str = var_qformat_str[1:].strip()
         
     elif '/*' in input_line:
         var_qformat_str = input_line.split('/*')[1].strip()
-        print(var_qformat_str)
         while var_qformat_str[0] is not ('q' or 'Q') and ('q' or 'Q') in var_qformat_str[1:]:
             var_qformat_str = var_qformat_str[1:].strip()
     else:
@@ -44,12 +34,27 @@ def get_variable(input_line):
     qformat_re = re.compile("[Qq][\d]+\.[\d]+")
     qformat = qformat_re.match(var_qformat_str)
     if qformat:
-        (_,nInt,nFraction) = scanf.scanf("%c%d.%d",qformat.group())    
-    print(nInt,nFraction)
+        (_,nInt,nFraction) = scanf.scanf("%c%d.%d",qformat.group())
+
+    # Get variables
+    var_dict = {}
+    var_re = re.compile("fix_t \w[,\s\w]*") # gets all var declarations
+    #Qformat = re.compile("fix_t\s+\w[,\s\w]*[\s=]*[x\d\sa-fA-F]*;\s*/[\*/]+\s*[Qq][\d]+\.[\d]+[\s\*]*[/]*") # fix_t a[,b,c,d][ = 0x123]; // Q3.28 
+    match = var_re.match(input_line)
+    if match:
+        match_str = match.group()
+        in_vars = match_str.split('fix_t')[1].strip() # removes 'fix_t'
+
+        for i in in_vars.split(','):
+            var_dict[i.strip()] = fix(nInt,nFraction)
+
+    return var_dict
+##
+
+
 
 
 ##
-
 
 
 
