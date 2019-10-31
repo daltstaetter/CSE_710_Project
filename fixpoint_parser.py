@@ -13,10 +13,7 @@ from fix import fix
 
 
 ##
-
-
-##
-def get_variable(input_line):
+def get_variable(input_line, var_dict):
     # Get q_format
     if '//' in input_line:
         var_qformat_str = input_line.split('//')[1].strip()
@@ -37,7 +34,6 @@ def get_variable(input_line):
         (_,nInt,nFraction) = scanf.scanf("%c%d.%d",qformat.group())
 
     # Get variables
-    var_dict = {}
     var_re = re.compile("fix_t \w[,\s\w]*") # gets all var declarations
     #Qformat = re.compile("fix_t\s+\w[,\s\w]*[\s=]*[x\d\sa-fA-F]*;\s*/[\*/]+\s*[Qq][\d]+\.[\d]+[\s\*]*[/]*") # fix_t a[,b,c,d][ = 0x123]; // Q3.28 
     match = var_re.match(input_line)
@@ -49,20 +45,21 @@ def get_variable(input_line):
             var_dict[i.strip()] = fix(nInt,nFraction)
 
     return var_dict
+#
+def check_format(input_line):
+    FMUL_re = re.compile('FMUL3\(\w,\w,\w\)')
+    
+    pass
+
 ##
 
 
-
-
-##
-
-
-
-
-
-#sys.argv[0] = 'fixpoint_parser.py'
+sys.argv = []
+sys.argv.append(None)
+sys.argv.append(None)
+sys.argv[0] = 'fixpoint_parser.py'
 #sys.argv.append('filename.c')
-#sys.argv.append('/home/daltstaetter/eclipse_workspace/Fixed_Point_program/main.c')
+sys.argv[1] = '/home/daltstaetter/eclipse_workspace/Fixed_Point_program/main.c'
 #sys.argv.append('/home/daltstaetter/Fall_2019/CSE_710/Project/meeting.txt')
 
 if len(sys.argv) is not 2:
@@ -81,28 +78,30 @@ else:
     print("invalid path to {0} or {0} does not exist".format(sys.argv[1]))
     sys.exit()
 
+##
+
 lvars = dict()
 found_fmul3 = 0
-cnt = 0
 line_num = 0
+var_dict = {}
 with path.open() as in_file:
     program = in_file.readlines()
     for line in program:
         line_num = line_num + 1
         if line.strip().startswith(r'//'):
             continue
-        elif line.strip().startswith(r'fix_t'):
-            get_variable(line.strip())
-            pass # identify variables & assign format
-        elif 'FMUL3' in line.strip():
+        elif line.strip().startswith(r'fix_t'): # identify variables & assign format
+            var_dict = get_variable(line.strip(), var_dict)
+        elif 'FMUL3(' in line.strip():
+            check_format(line.strip())
             found_fmul3 = True;#print(line + " found FMUL",end='')
-            cnt = cnt + 1
-            
-                           
+
         print(line.rstrip('\n'), end=' ')
         if found_fmul3 is True:
-            print("Found FMUL3_{}".format(cnt), end='')
+            print("Found FMUL3", end='')
             found_fmul3 = False
 
         print("")
 ##        
+for key,val in var_dict.items():
+    print("{0}: Q{1}.{2}".format(key,val.integer(),val.fraction()))
