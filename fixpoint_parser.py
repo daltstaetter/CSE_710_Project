@@ -11,6 +11,8 @@ import os,sys, pathlib, re, scanf, fix
 reload(fix)
 from fix import fix
 
+WORD_SIZE=32
+FIX_BITS=WORD_SIZE-1
 
 ##
 def get_variable(input_line, var_dict):
@@ -51,40 +53,39 @@ def check_format(input_line, var_dict):
     op1_re = re.compile('\(\s*\w+\s*,')
     op2_re = re.compile(',\s*\w+\s*,')
     op3_re = re.compile(',\s*\w+\s*\)')
-    try:
-        print("in check_format: " + input_line)
-        if FMUL_re.search(input_line):
-            fmul_list = FMUL_re.findall(input_line)
-            for match in fmul_list:
-                operands=match.split('FMUL3')[1].split(',')
-                print(operands)
-                for i,val in enumerate(operands):
-                    operands[i] = operands[i].strip()
-                operands = ','.join(operands)
-                (op1,op2,op3) = scanf.scanf('(%s,%s,%s)', operands)
+    #try:
+    if FMUL_re.search(input_line):
+        fmul_list = FMUL_re.findall(input_line)
+        for match in fmul_list:
+            operands=match.split('FMUL3')[1].split(',')
+            for i,val in enumerate(operands):
+                operands[i] = operands[i].strip()
+            operands = ','.join(operands)
+            (op1,op2,op3) = scanf.scanf('(%s,%s,%s)', operands)
 
-                try:
-                    op3 = int(op3)
-                    print(op3)
-                except ValueError:
-                    sys.exit('Value Error: operand 3 not a numeric literal\nInput line: {}'.format(input_line))
+            try:
+                op3 = int(op3)
+            except ValueError:
+                sys.exit('Value Error: operand 3 not a numeric literal\nInput line: {}'.format(input_line))
 
-        dest_re = re.compile('\s*\w\s*=')
+    dest_re = re.compile('\s*\w\s*=')
 
-        if FMUL_re.search(input_line) and dest_re.match(input_line):
-            dest_str = dest_re.match(input_line).group()[:-1].strip()
-            if (dest_str and op1 and op2) in var_dict.keys():
-                frac_bits = var_dict[op1].fraction() + var_dict[op2].fraction() - op3
-                if var_dict[dest_str].fraction() is not frac_bits:
-                    print("Error: result expected Q{0} from Q{1} * Q{2}".format(var_dict[dest_str].qformat(),
-                                                                                var_dict[op1].qformat(),
-                                                                                var_dict[op2].qformat()
-                                                                                )
-                          )
-            else:
-                pass # TODO figure out how to handle misses
-    except Exception:
-        sys.exit('Input line: {}'.format(input_line))
+    if FMUL_re.search(input_line) and dest_re.match(input_line):
+        dest_str = dest_re.match(input_line).group()[:-1].strip()
+        if (dest_str and op1 and op2) in var_dict.keys():
+            frac_bits = var_dict[op1].fraction() + var_dict[op2].fraction() - op3
+            if var_dict[dest_str].fraction() is not frac_bits:
+                print("Error: expected->Q{0}, calculated->Q{1} from Q{2} * Q{3}".format(
+                                                                            var_dict[dest_str].qformat(),
+                                                                            (FIX_BITS-frac_bits, frac_bits),
+                                                                            var_dict[op1].qformat(),
+                                                                            var_dict[op2].qformat()
+                                                                            )
+                      )
+        else:
+            pass # TODO figure out how to handle misses
+    #except Exception:
+    #    sys.exit('Input line: {}'.format(input_line))
             
 ##
 
