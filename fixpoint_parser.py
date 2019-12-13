@@ -3,6 +3,11 @@
 from platform import python_version
 #from importlib import reload
 import os,sys, pathlib, re, scanf, fix
+
+from pygccxml import utils
+from pygccxml import declarations
+from pygccxml import parser
+
 #reload(fix)
 from fix import fix
 
@@ -99,7 +104,7 @@ sys.argv.append(None)
 sys.argv.append(None)
 sys.argv[0] = 'fixpoint_parser.py'
 #sys.argv.append('filename.c')
-sys.argv[1] = '/home/daltstaetter/eclipse_workspace/Fixed_Point_program/main.c'
+sys.argv[1] = '     '
 #sys.argv.append('/home/daltstaetter/Fall_2019/CSE_710/Project/meeting.txt')
 
 if len(sys.argv) is not 2:
