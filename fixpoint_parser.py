@@ -99,12 +99,12 @@ def check_format(input_line, var_dict, line_num):
 ##
 
 
-sys.argv = []
-sys.argv.append(None)
-sys.argv.append(None)
-sys.argv[0] = 'fixpoint_parser.py'
+#sys.argv = []
+#sys.argv.append(None)
+#sys.argv.append(None)
+#sys.argv[0] = 'fixpoint_parser.py'
 #sys.argv.append('filename.c')
-sys.argv[1] = '     '
+#sys.argv[1] = '     '
 #sys.argv.append('/home/daltstaetter/Fall_2019/CSE_710/Project/meeting.txt')
 
 if len(sys.argv) is not 2:
